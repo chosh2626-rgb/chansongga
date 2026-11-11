@@ -66,7 +66,7 @@ const Player = (() => {
       audioEl.currentTime = start;
       const el = audioEl;
       el.play().catch(() => { if (a.notes) playNotes(a.notes, a.bpm); });
-      stopTimer = setTimeout(() => el.pause(), (a.duration || 10) * 1000);
+      if (a.duration) stopTimer = setTimeout(() => el.pause(), a.duration * 1000);
       el.addEventListener('error', () => { if (a.notes && audioEl === el) playNotes(a.notes, a.bpm); });
     } else if (a.notes) {
       playNotes(a.notes, a.bpm);

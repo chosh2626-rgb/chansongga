@@ -33,12 +33,16 @@ npm start
 ## 찬송가 추가·수정 (`hymns.js`)
 
 ```js
-{ no: 305, title: '나 같은 죄인 살리신', bpm: 88, notes: 'D4:1 G4:2 ...' }
+{ no: 305, title: '나 같은 죄인 살리신', audio: '/audio/305.mp3' }
 ```
 
-- `notes`: `음이름:박자` 나열. 브라우저가 피아노 비슷한 소리로 연주합니다.
-- 실제 음원을 쓰려면 `public/audio/305.mp3` 처럼 파일을 넣고
-  `audio: '/audio/305.mp3', start: 0, duration: 10` 을 추가하세요. (음원이 있으면 음원이 우선)
+- `audio`: `public/audio` 폴더의 첫 소절 mp3. 다른 음원으로 바꾸려면 같은 이름으로 파일만 교체하면 됩니다.
+- `notes`: 음원이 없는 곡은 `음이름:박자` 멜로디를 브라우저가 직접 연주합니다.
+
+### 음원 출처
+
+`public/audio` 의 음원은 [Open Hymnal Project](http://openhymnal.org/)의 공개 저작물(public domain) 악보를
+피아노 음색으로 변환해 첫 소절만 잘라낸 것입니다.
 
 ## 점수
 
