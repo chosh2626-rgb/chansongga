@@ -132,3 +132,28 @@ button { font-family: inherit; cursor: pointer; border: 0; }
 .hint { text-align: center; opacity: .7; margin-top: .8rem; font-size: 1rem; }
 .foot { align-items: center; }
 .menu .btn { font-size: .95rem; }
+
+/* 연령대별 가장 빠른 정답자: 큰 카드 화면 */
+.panel.wide { width: 100%; height: 94vh; max-height: 94vh; padding: 2.5vh 2.5vw; background: linear-gradient(160deg, #2b1a5e, #4a2c8f); }
+.panel.wide h2 { font-size: 5vh; margin-bottom: 2vh; }
+.panel.wide .foot { margin-top: 2vh; }
+.agegrid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; gap: 2vh 1.6vw; }
+.agecard { --c: #888; background: #fff; color: #2b1a5e; border-radius: 2.4vh; overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 1vh 0 rgba(0,0,0,.25); animation: pop .35s backwards; min-height: 0; }
+.agecard.a0 { --c: #e21b3c; } .agecard.a1 { --c: #e8590c; } .agecard.a2 { --c: #d89e00; }
+.agecard.a3 { --c: #26890c; } .agecard.a4 { --c: #1368ce; } .agecard.a5 { --c: #7b3fa8; }
+.agecard:nth-child(2) { animation-delay: .06s; } .agecard:nth-child(3) { animation-delay: .12s; }
+.agecard:nth-child(4) { animation-delay: .18s; } .agecard:nth-child(5) { animation-delay: .24s; } .agecard:nth-child(6) { animation-delay: .3s; }
+.agehead { background: var(--c); color: #fff; font-size: 3.6vh; font-weight: 800; padding: .9vh 1.2vw; display: flex; justify-content: space-between; align-items: center; }
+.agehead .crown { font-size: 4vh; line-height: 1; }
+.agebody { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: .5vh 1vw; min-height: 0; }
+.agename { font-size: 8vh; font-weight: 900; line-height: 1.1; word-break: keep-all; }
+.agetime { font-size: 4.4vh; font-weight: 800; color: var(--c); margin-top: .4vh; }
+.ageq { font-size: 2.2vh; opacity: .6; margin-top: .3vh; }
+.agenow { background: #f1edfa; font-size: 2.5vh; padding: 1vh 1.2vw; display: flex; gap: .8em; align-items: center; }
+.agenow span:first-child { background: var(--c); color: #fff; border-radius: 999px; padding: .1em .8em; font-size: .85em; font-weight: 700; white-space: nowrap; }
+.agenow .none { opacity: .5; }
+.agecard.empty { background: rgba(255,255,255,.75); }
+.agecard.empty .agename { opacity: .25; }
+.agecard.champ { outline: .8vh solid #ffd23f; box-shadow: 0 0 5vh rgba(255,210,63,.7); }
+@media (max-width: 800px) { .agegrid { grid-template-columns: 1fr 1fr; grid-template-rows: none; overflow: auto; } .agename { font-size: 2rem; } }

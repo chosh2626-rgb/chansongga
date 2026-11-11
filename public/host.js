@@ -14,6 +14,7 @@ let overlay = null; // 'qr' | 'rank' | null
 function paintOverlay() {
   const box = $('overlay');
   box.classList.toggle('hidden', !overlay);
+  $('panel').classList.toggle('wide', overlay === 'age');
   if (!overlay || !state) return;
   const close = '<div class="foot"><button class="btn" data-act="close">닫기</button></div>';
   if (overlay === 'qr') {
@@ -21,15 +22,27 @@ function paintOverlay() {
       <div class="qrbox big"><img src="/qr.svg" alt="QR"><div class="url">${esc(joinUrl)}</div></div>${close}`;
   } else if (overlay === 'age') {
     const f = state.ageFast;
-    const cell = (x, withQ) => x
-      ? `<b>${esc(x.name)}</b> <small>${sec(x.ms)}${withQ ? ` · ${x.q}번 문제` : ''}</small>`
-      : '<span class="none">—</span>';
-    const rows = f.rows.map((r) => `<tr><td>${esc(r.age)}</td><td>${cell(r.now)}</td><td>${cell(r.best, true)}</td></tr>`).join('');
+    const times = f.rows.filter((r) => r.best).map((r) => r.best.ms);
+    const top = times.length ? Math.min(...times) : null;
+    const cards = f.rows.map((r, i) => {
+      const b = r.best;
+      const champ = b && b.ms === top;
+      const now = r.now
+        ? `<b>${esc(r.now.name)}</b> ${sec(r.now.ms)}`
+        : '<span class="none">정답자 없음</span>';
+      return `<div class="agecard a${i} ${b ? '' : 'empty'} ${champ ? 'champ' : ''}">
+        <div class="agehead">${esc(r.age)}${champ ? '<span class="crown">👑</span>' : ''}</div>
+        <div class="agebody">
+          ${b ? `<div class="agename">${esc(b.name)}</div>
+                 <div class="agetime">⚡ ${sec(b.ms)}</div>
+                 <div class="ageq">${b.q}번 문제에서 기록</div>`
+              : `<div class="agename none">—</div><div class="ageq">아직 정답자가 없습니다</div>`}
+        </div>
+        <div class="agenow"><span>${f.lastQ ? f.lastQ + '번 문제' : '이번 문제'}</span>${now}</div>
+      </div>`;
+    }).join('');
     $('panel').innerHTML = `<h2>⚡ 연령대별 가장 빠른 정답자</h2>
-      <div class="tablewrap"><table class="rank age"><thead><tr><th>연령대</th>
-        <th>${f.lastQ ? f.lastQ + '번 문제' : '이번 문제'}에서 가장 빠른 사람</th><th>전체 최고 기록</th></tr></thead>
-      <tbody>${rows}</tbody></table></div>
-      <p class="hint">정답을 맞힌 사람 중 가장 빨리 누른 사람입니다. 정답 공개 후에 갱신됩니다.</p>${close}`;
+      <div class="agegrid">${cards}</div>${close}`;
   } else {
     const rows = state.ranking.map((t) =>
       `<tr><td>${t.rank}</td><td>${esc(t.name)}</td><td>${esc(t.age)}</td><td>${t.correct}문제</td><td>${t.score.toLocaleString()}점</td></tr>`).join('');
