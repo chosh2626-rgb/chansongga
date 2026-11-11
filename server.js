@@ -82,9 +82,9 @@ function hostState() {
     const { notes, bpm, audio, start, duration } = q.hymn;
     s.audio = { notes, bpm, audio, start, duration };
   }
+  const rank = ranking();
+  s.ranking = rank; // 순위 메뉴에서 언제든 볼 수 있도록 항상 보냄
   if (game.phase === 'final') {
-    const rank = ranking();
-    s.ranking = rank;
     s.byAge = AGE_GROUPS.map((age) => ({ age, top: rank.find((r) => r.age === age) || null })).filter((g) => g.top);
   }
   return s;

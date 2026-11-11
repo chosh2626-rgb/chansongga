@@ -8,9 +8,18 @@
 </head>
 <body>
 <div class="stage">
-  <header><span>🎵 찬송가 퀴즈</span><span id="hinfo"></span></header>
+  <header>
+    <span>🎵 찬송가 퀴즈</span>
+    <nav class="menu">
+      <span id="hinfo"></span>
+      <button class="btn ghost" data-act="qr">📱 QR 코드</button>
+      <button class="btn ghost" data-act="rank">🏅 참가자 순위</button>
+      <button class="btn ghost" data-act="home">🏠 처음 화면</button>
+    </nav>
+  </header>
   <main id="main"></main>
 </div>
+<div id="overlay" class="overlay hidden"><div class="panel" id="panel"></div></div>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/synth.js"></script>
 <script src="/host.js"></script>

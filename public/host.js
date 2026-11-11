@@ -8,6 +8,26 @@ let state = null;
 let tick = null;
 let lastQ = 0;
 let count = 10;
+let overlay = null; // 'qr' | 'rank' | null
+
+// QR 코드 / 참가자 순위 창
+function paintOverlay() {
+  const box = $('overlay');
+  box.classList.toggle('hidden', !overlay);
+  if (!overlay || !state) return;
+  const close = '<div class="foot"><button class="btn" data-act="close">닫기</button></div>';
+  if (overlay === 'qr') {
+    $('panel').innerHTML = `<h2>📱 QR로 입장하세요</h2>
+      <div class="qrbox big"><img src="/qr.svg" alt="QR"><div class="url">${esc(joinUrl)}</div></div>${close}`;
+  } else {
+    const rows = state.ranking.map((t) =>
+      `<tr><td>${t.rank}</td><td>${esc(t.name)}</td><td>${esc(t.age)}</td><td>${t.correct}문제</td><td>${t.score.toLocaleString()}점</td></tr>`).join('');
+    $('panel').innerHTML = `<h2>🏅 참가자 순위 (${state.ranking.length}명)</h2>
+      <div class="tablewrap"><table class="rank"><thead><tr><th>순위</th><th>이름</th><th>연령대</th><th>정답</th><th>점수</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="5">아직 참가자가 없습니다</td></tr>'}</tbody></table></div>${close}`;
+  }
+}
+$('overlay').addEventListener('click', (e) => { if (e.target.id === 'overlay') { overlay = null; paintOverlay(); } });
 
 socket.on('connect', () => {
   socket.emit('host:hello', key, (res) => {
@@ -15,7 +35,7 @@ socket.on('connect', () => {
   });
 });
 socket.on('answered', (n) => { const el = $('answered'); if (el) el.textContent = n; });
-socket.on('state', (s) => { state = s; render(); });
+socket.on('state', (s) => { state = s; render(); paintOverlay(); });
 
 // 버튼 처리 (화면이 다시 그려져도 동작하도록 한 곳에서 처리)
 document.addEventListener('click', (e) => {
@@ -28,6 +48,9 @@ document.addEventListener('click', (e) => {
   if (act === 'reveal') socket.emit('host:reveal');
   if (act === 'replay' && state) Player.play(state.audio);
   if (act === 'again') socket.emit('host:again');
+  if (act === 'qr' || act === 'rank') { overlay = act; paintOverlay(); }
+  if (act === 'close') { overlay = null; paintOverlay(); }
+  if (act === 'home' && confirm('진행 중인 퀴즈를 멈추고 처음 화면(QR 대기 화면)으로 돌아갈까요?\n참가자는 그대로 유지됩니다.')) socket.emit('host:again');
   if (act === 'reset' && confirm('참가자 명단까지 모두 지우고 처음으로 돌아갈까요?')) socket.emit('host:reset');
 });
 document.addEventListener('change', (e) => { if (e.target.id === 'count') count = Number(e.target.value); });
@@ -41,7 +64,7 @@ function render() {
   clearInterval(tick);
   const main = $('main');
   $('hinfo').textContent = s.phase === 'lobby' || s.phase === 'final'
-    ? `참가자 ${s.players.length}명` : `${s.qNumber} / ${s.qTotal} 번 문제`;
+    ? `참가자 ${s.players.length}명` : `${s.qNumber} / ${s.qTotal} 번 문제 · 참가자 ${s.players.length}명`;
 
   if (s.phase === 'lobby') {
     lastQ = 0;
