@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>찬송가 퀴즈</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="phone">
+  <!-- 입장 -->
+  <section id="v-join">
+    <h1>🎵 찬송가 퀴즈</h1>
+    <p class="sub">첫 소절을 듣고 찬송가를 맞혀 보세요</p>
+    <label for="name">이름</label>
+    <input type="text" id="name" maxlength="12" placeholder="이름을 입력하세요" autocomplete="off">
+    <label>연령대</label>
+    <div class="ages" id="ages"></div>
+    <button class="btn" id="joinBtn">입장하기</button>
+    <p class="err" id="err"></p>
+  </section>
+
+  <!-- 게임 -->
+  <section id="v-game" class="hidden" style="flex:1;display:flex;flex-direction:column">
+    <div class="me"><span><b id="meName"></b> <span id="meAge"></span></span><span>점수 <b id="meScore">0</b></span></div>
+    <div id="body" style="flex:1;display:flex;flex-direction:column"></div>
+  </section>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/player.js"></script>
+</body>
+</html>
