@@ -8,6 +8,7 @@ const HYMNS = require('./hymns');
 const PORT = process.env.PORT || 3000;
 const HOST_KEY = process.env.HOST_KEY || ''; // 설정하면 /host?key=값 으로만 진행 화면 접속 가능
 const TIME_LIMIT_MS = Number(process.env.TIME_LIMIT_SEC || 20) * 1000;
+const POINTS_PER_CORRECT = 10;
 const AGE_GROUPS = ['30대 이하', '40대', '50대', '60대', '70대', '80대 이상'];
 
 const app = express();
@@ -56,7 +57,7 @@ function buildQuestions(count) {
 
 const ranking = () =>
   [...game.players.values()]
-    .sort((a, b) => b.score - a.score || b.correct - a.correct)
+    .sort((a, b) => b.score - a.score || a.time - b.time) // 점수가 같으면 정답에 걸린 시간 합이 짧은 사람이 위
     .map((p, i) => ({ rank: i + 1, id: p.id, name: p.name, age: p.age, score: p.score, correct: p.correct }));
 
 function baseState() {
@@ -146,9 +147,9 @@ function reveal() {
     const correct = a.choice === q.answer;
     let gained = 0;
     if (correct) {
-      // 정답 500점 + 빠를수록 최대 500점 추가
-      gained = Math.round(500 + 500 * Math.max(0, 1 - a.ms / TIME_LIMIT_MS));
+      gained = POINTS_PER_CORRECT; // 한 문제 맞힐 때마다 10점
       p.score += gained;
+      p.time += a.ms;
       p.correct += 1;
       correctList.push({ name: p.name, age: p.age, ms: a.ms });
     }
@@ -190,7 +191,7 @@ function resetGame(keepPlayers) {
   game.lastResult = null;
   game.ageBest = {};
   if (keepPlayers) {
-    for (const p of game.players.values()) Object.assign(p, { score: 0, correct: 0 });
+    for (const p of game.players.values()) Object.assign(p, { score: 0, correct: 0, time: 0 });
   } else {
     game.players.clear();
     io.to('players').emit('kicked');
@@ -212,7 +213,7 @@ io.on('connection', (socket) => {
   socket.on('host:start', hostOnly((count) => {
     if (game.players.size === 0) return;
     const n = Math.max(1, Math.min(Number(count) || 10, HYMNS.length));
-    for (const p of game.players.values()) Object.assign(p, { score: 0, correct: 0 });
+    for (const p of game.players.values()) Object.assign(p, { score: 0, correct: 0, time: 0 });
     game.questions = buildQuestions(n);
     game.qIndex = -1;
     game.ageBest = {};
@@ -230,7 +231,7 @@ io.on('connection', (socket) => {
     if (!id || !name || !AGE_GROUPS.includes(age)) return ack && ack({ ok: false, error: '이름과 연령대를 확인해 주세요.' });
     let p = game.players.get(id);
     if (!p) {
-      p = { id, name, age, score: 0, correct: 0, connected: true, socketId: socket.id };
+      p = { id, name, age, score: 0, correct: 0, time: 0, connected: true, socketId: socket.id };
       game.players.set(id, p);
     } else {
       Object.assign(p, { name, age, connected: true, socketId: socket.id });
