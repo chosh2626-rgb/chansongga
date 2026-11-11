@@ -19,6 +19,17 @@ function paintOverlay() {
   if (overlay === 'qr') {
     $('panel').innerHTML = `<h2>📱 QR로 입장하세요</h2>
       <div class="qrbox big"><img src="/qr.svg" alt="QR"><div class="url">${esc(joinUrl)}</div></div>${close}`;
+  } else if (overlay === 'age') {
+    const f = state.ageFast;
+    const cell = (x, withQ) => x
+      ? `<b>${esc(x.name)}</b> <small>${sec(x.ms)}${withQ ? ` · ${x.q}번 문제` : ''}</small>`
+      : '<span class="none">—</span>';
+    const rows = f.rows.map((r) => `<tr><td>${esc(r.age)}</td><td>${cell(r.now)}</td><td>${cell(r.best, true)}</td></tr>`).join('');
+    $('panel').innerHTML = `<h2>⚡ 연령대별 가장 빠른 정답자</h2>
+      <div class="tablewrap"><table class="rank age"><thead><tr><th>연령대</th>
+        <th>${f.lastQ ? f.lastQ + '번 문제' : '이번 문제'}에서 가장 빠른 사람</th><th>전체 최고 기록</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+      <p class="hint">정답을 맞힌 사람 중 가장 빨리 누른 사람입니다. 정답 공개 후에 갱신됩니다.</p>${close}`;
   } else {
     const rows = state.ranking.map((t) =>
       `<tr><td>${t.rank}</td><td>${esc(t.name)}</td><td>${esc(t.age)}</td><td>${t.correct}문제</td><td>${t.score.toLocaleString()}점</td></tr>`).join('');
@@ -48,7 +59,7 @@ document.addEventListener('click', (e) => {
   if (act === 'reveal') socket.emit('host:reveal');
   if (act === 'replay' && state) Player.play(state.audio);
   if (act === 'again') socket.emit('host:again');
-  if (act === 'qr' || act === 'rank') { overlay = act; paintOverlay(); }
+  if (act === 'qr' || act === 'rank' || act === 'age') { overlay = act; paintOverlay(); }
   if (act === 'close') { overlay = null; paintOverlay(); }
   if (act === 'home' && confirm('진행 중인 퀴즈를 멈추고 처음 화면(QR 대기 화면)으로 돌아갈까요?\n참가자는 그대로 유지됩니다.')) socket.emit('host:again');
   if (act === 'reset' && confirm('참가자 명단까지 모두 지우고 처음으로 돌아갈까요?')) socket.emit('host:reset');
@@ -123,7 +134,8 @@ function render() {
         <div class="list card"><h3>🏅 종합 점수</h3>
           <ol>${r.top.slice(0, 3).map((t) => `<li><span>${t.rank}. ${esc(t.name)}<small>${esc(t.age)}</small></span><span>${t.score.toLocaleString()}점</span></li>`).join('')}</ol></div>
       </div>
-      <div class="foot"><button class="btn" data-act="next">${last ? '최종 결과 보기' : '다음 문제 ▶'}</button></div></div>`;
+      <div class="foot"><button class="btn ghost" data-act="age">⚡ 연령대별 가장 빠른 사람</button>
+      <button class="btn" data-act="next">${last ? '최종 결과 보기' : '다음 문제 ▶'}</button></div></div>`;
   } else if (s.phase === 'final') {
     Player.stop();
     const medal = ['🥇', '🥈', '🥉'];
@@ -136,6 +148,7 @@ function render() {
           <ol>${s.byAge.map((g) => `<li><span>${esc(g.age)}</span><span>${esc(g.top.name)} · ${g.top.score.toLocaleString()}점</span></li>`).join('')}</ol></div>
       </div>
       <div class="foot"><button class="btn" data-act="again">같은 참가자로 다시 하기</button>
+      <button class="btn ghost" data-act="age">⚡ 연령대별 가장 빠른 사람</button>
       <button class="btn ghost" data-act="reset">처음으로 (참가자 초기화)</button></div>`;
   }
 }

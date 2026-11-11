@@ -33,6 +33,7 @@ const game = {
   answers: new Map(), // playerId -> { choice, ms }
   timer: null,
   lastResult: null,
+  ageBest: {}, // 연령대 -> 이번 게임에서 가장 빨랐던 정답 { name, ms, q }
 };
 
 const shuffle = (arr) => {
@@ -84,6 +85,11 @@ function hostState() {
   }
   const rank = ranking();
   s.ranking = rank; // 순위 메뉴에서 언제든 볼 수 있도록 항상 보냄
+  const last = game.lastResult;
+  s.ageFast = {
+    lastQ: last ? last.qNumber : 0,
+    rows: AGE_GROUPS.map((age) => ({ age, now: (last && last.ageNow[age]) || null, best: game.ageBest[age] || null })),
+  };
   if (game.phase === 'final') {
     s.byAge = AGE_GROUPS.map((age) => ({ age, top: rank.find((r) => r.age === age) || null })).filter((g) => g.top);
   }
@@ -149,12 +155,21 @@ function reveal() {
     perPlayer[id] = { correct, gained, ms: a.ms };
   }
   correctList.sort((a, b) => a.ms - b.ms);
+  // 연령대별로 이번 문제를 가장 빨리 맞힌 사람 + 게임 전체 최고 기록
+  const ageNow = {};
+  for (const c of correctList) {
+    if (!ageNow[c.age]) ageNow[c.age] = { name: c.name, ms: c.ms };
+    const best = game.ageBest[c.age];
+    if (!best || c.ms < best.ms) game.ageBest[c.age] = { name: c.name, ms: c.ms, q: game.qIndex + 1 };
+  }
   const counts = [0, 0, 0, 0];
   for (const a of game.answers.values()) counts[a.choice] += 1;
   game.lastResult = {
     answer: q.answer,
     answerLabel: q.choices[q.answer],
     winner: correctList[0] || null, // 가장 빨리 맞힌 사람
+    ageNow,
+    qNumber: game.qIndex + 1,
     fastest: correctList.slice(0, 5),
     correctCount: correctList.length,
     answeredCount: game.answers.size,
@@ -173,6 +188,7 @@ function resetGame(keepPlayers) {
   game.qIndex = -1;
   game.answers = new Map();
   game.lastResult = null;
+  game.ageBest = {};
   if (keepPlayers) {
     for (const p of game.players.values()) Object.assign(p, { score: 0, correct: 0 });
   } else {
@@ -199,6 +215,8 @@ io.on('connection', (socket) => {
     for (const p of game.players.values()) Object.assign(p, { score: 0, correct: 0 });
     game.questions = buildQuestions(n);
     game.qIndex = -1;
+    game.ageBest = {};
+    game.lastResult = null;
     startQuestion();
   }));
   socket.on('host:next', hostOnly(() => game.phase === 'reveal' && startQuestion()));

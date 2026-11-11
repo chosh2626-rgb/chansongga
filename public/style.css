@@ -125,3 +125,11 @@ button { font-family: inherit; cursor: pointer; border: 0; }
 .rank td:first-child { font-weight: 800; color: #ffd23f; }
 .rank td:last-child, .rank th:last-child { text-align: right; }
 .hostlink { display: block; text-align: center; margin-top: 2rem; padding: .9em; border-radius: 14px; background: rgba(255,255,255,.14); color: #fff; font-size: 1.15rem; text-decoration: none; }
+.rank.age td { font-size: 1.6rem; }
+.rank.age td:last-child, .rank.age th:last-child { text-align: left; }
+.rank.age b { color: #fff; } .rank.age td:first-child { white-space: nowrap; }
+.rank small { opacity: .75; font-size: .7em; margin-left: .3em; }
+.rank .none { opacity: .4; }
+.hint { text-align: center; opacity: .7; margin-top: .8rem; font-size: 1rem; }
+.foot { align-items: center; }
+.menu .btn { font-size: .95rem; }
