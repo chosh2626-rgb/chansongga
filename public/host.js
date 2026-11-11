@@ -120,7 +120,7 @@ function render() {
       <div class="meta">
         <span>답한 사람 <span id="answered">${s.answered}</span> / ${s.players.length}명</span>
         <span class="row"><button class="btn ghost" data-act="replay">🔁 다시 듣기</button>
-        <button class="btn ghost" data-act="reveal">정답 공개</button></span>
+        <button class="btn" data-act="reveal">⏱ 빨리 마감하기</button></span>
       </div>`;
     const t0 = Date.now() - s.elapsed;
     const paint = () => { const el = $('timer'); if (el) el.textContent = Math.max(0, Math.ceil((s.timeLimit - (Date.now() - t0)) / 1000)); };
